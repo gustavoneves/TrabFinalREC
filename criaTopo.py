@@ -42,16 +42,22 @@ def criaTeste():
 	"Cria a rede de testes"
 	topo = MyTopo()
 	#rede = Mininet(topo)
-	rede = Mininet(topo, link=TCLink)
+	#rede = Mininet(topo, link=TCLink)
+	rede = Mininet( topo, link=TCLink, autoStaticArp=True )
 	rede.start()
 
 	print "Testando as conexoes dos hosts com os switches"
 	dumpNodeConnections(rede.hosts)
-	
-	rede.pingAll()
+
+	h1, h4 = rede.getNodeByName('Hd1', 'He1')	
+	rede.iperf( ( h1, h4 ), l4Type='UDP' )
+	#rede.pingAll()
 	rede.stop()
 	
 if __name__ == '__main__':
 	setLogLevel('info')
 	criaTeste()
 #topos = { 'mytopo': ( lambda: MyTopo() ) }
+
+# iperf
+# http://mininet.org/api/classmininet_1_1net_1_1Mininet.html
