@@ -2,7 +2,7 @@ from mininet.topo import Topo
 from mininet.net import Mininet
 #from mininet.link import TCLink
 #from mininet.node import CPULimitedHost
-#from mininet.util import dumpNodeConnections
+from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
 from mininet.node import Node
 
@@ -35,18 +35,18 @@ class MyTopo( Topo ):
         #hostDireita3 = self.addHost( 'Hd3' )
 
 	        
-	hostDireita1 = self.addHost( 'Hd1', ip='10.0.1.2/24', defaultRoute='via 10.0.1.1/24' )
-	hostDireita2 = self.addHost( 'Hd2', ip='10.0.1.3/24', defaultRoute='via 10.0.1.1/24' )
-    	hostDireita3 = self.addHost( 'Hd3', ip='10.0.1.4/24', defaultRoute='via 10.0.1.1/24' )
+	hostDireita1 = self.addHost( 'Hd1', ip='10.0.1.2/24', defaultRoute='via 10.0.1.1' )
+	hostDireita2 = self.addHost( 'Hd2', ip='10.0.1.3/24', defaultRoute='via 10.0.1.1' )
+    	hostDireita3 = self.addHost( 'Hd3', ip='10.0.1.4/24', defaultRoute='via 10.0.1.1' )
 
 
         #hostEsquerda1 = self.addHost( 'He1' )
         #hostEsquerda2 = self.addHost( 'He2' )
         #hostEsquerda3 = self.addHost( 'He3' )
 	
-	hostEsquerda1 = self.addHost( 'He1', ip='10.0.2.2/24', defaultRoute='via 10.0.2.1/24' )
-	hostEsquerda2 = self.addHost( 'He2', ip='10.0.2.3/24', defaultRoute='via 10.0.2.1/24' )
-	hostEsquerda3 = self.addHost( 'He3', ip='10.0.2.4/24', defaultRoute='via 10.0.2.1/24' )         
+	hostEsquerda1 = self.addHost( 'He1', ip='10.0.2.2/24', defaultRoute='via 10.0.2.1' )
+	hostEsquerda2 = self.addHost( 'He2', ip='10.0.2.3/24', defaultRoute='via 10.0.2.1' )
+	hostEsquerda3 = self.addHost( 'He3', ip='10.0.2.4/24', defaultRoute='via 10.0.2.1' )         
 
         # Criacao dos switches
         switchDireita = self.addSwitch( 'S1' )
@@ -64,10 +64,12 @@ class MyTopo( Topo ):
 
 	
 	# adicao do link entre os switches e o roteador
-	self.addLink( switchEsquerda, roteador, intfName2='r0-eth1', params2={ 'ip' : '10.0.2.1/24' } )
-	self.addLink( switchDireita, roteador, intfName2='r0-eth2', params2={ 'ip' : '10.0.1.1/24' } )        
-
-        # Adicao do link entre os switches
+	#self.addLink( switchEsquerda, roteador, intfName2='r0-eth2', params2={ 'ip' : '10.0.2.1/24' } )
+	#self.addLink( switchDireita, roteador, intfName2='r0-eth3', params2={ 'ip' : '10.0.1.1/24' } )        
+	self.addLink ( switchEsquerda, roteador, intfName2='r0-eth1' )
+	self.addLink ( switchDireita, roteador, intfName2='r0-eth2' )
+        
+	# Adicao do link entre os switches
         #self.addLink( switchEsquerda, switchDireita )
        	#self.addLink( switchEsquerda, switchDireita, bw=0.2, delay='50ms' )
 	
@@ -78,6 +80,10 @@ def criaTeste():
 	#rede = Mininet(topo, link=TCLink)
 	#rede = Mininet( topo, link=TCLink, autoStaticArp=True )
 	rede.start()
+	
+	rot = rede.get('r0')
+	rot.cmd('ifconfig r0-eth1 10.0.2.1 broadcast 10.0.2.255 netmask 255.255.255.0')
+	rot.cmd('ifconfig r0-eth2 10.0.1.1 broadcast 10.0.1.255 netmask 255.255.255.0')
 
 	#print "Testando as conexoes dos hosts com os switches"
 	#dumpNodeConnections(rede.hosts)
@@ -90,7 +96,7 @@ def criaTeste():
 	print rede[ 'r0' ].cmd( 'route' )
 	
 	rede.pingAll()
-
+	
 	info( 'Tabela de rotemento no roteador\n' )
 	print rede[ 'r0' ].cmd( 'route' )
 	#CLI( rede )
