@@ -1,6 +1,6 @@
 from mininet.topo import Topo
 from mininet.net import Mininet
-#from mininet.link import TCLink
+from mininet.link import TCLink
 #from mininet.node import CPULimitedHost
 #from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
@@ -8,6 +8,7 @@ from mininet.node import Node
 
 from mininet.cli import CLI
 
+import time
 #from mininet.node import UserSwitch, OVSKernelSwitch, Controller
 #from mininet.log import lg
 #from mininet.util import irange, quietRun
@@ -33,8 +34,7 @@ class MyTopo( Topo ):
 
         # Initialize topology
         Topo.__init__( self )
-	
-	#roteador = self.addNode( 'r0', cls=LinuxRouter, ip='10.0.0.1/24' ) 	
+	 	
         roteadorEsquerda = self.addNode( 'r0', cls=LinuxRouter, ip='10.0.1.1/24' )
 	
 	roteadorDireita = self.addNode( 'r1', cls=LinuxRouter, ip='10.0.2.1/24' )
@@ -65,11 +65,13 @@ class MyTopo( Topo ):
 	
 	# adicao do link entre os switches e os roteadores     
 
-	self.addLink ( switchEsquerda, roteadorEsquerda, intfName2='r0-eth1' )
-	self.addLink ( switchDireita, roteadorDireita, intfName2='r1-eth1' )
+	self.addLink ( switchEsquerda, roteadorEsquerda, intfName2='r0-eth1', maxq=15 )
+	self.addLink ( switchDireita, roteadorDireita, intfName2='r1-eth1', maxq=20 )
 
-	self.addLink ( roteadorEsquerda, roteadorDireita, intfName1='r0-eth0', intfName2='r1-eth0' ) 
+	#self.addLink ( roteadorEsquerda, roteadorDireita, intfName1='r0-eth0', intfName2='r1-eth0' ) 
         
+	# link entre os roteadores
+	self.addLink ( roteadorEsquerda, roteadorDireita, intfName1='r0-eth0', intfName2='r1-eth0', bw=0.2, delay='50ms' )
 	# Adicao do link entre os switches
         #self.addLink( switchEsquerda, switchDireita )
        	#self.addLink( switchEsquerda, switchDireita, bw=0.2, delay='50ms' )
@@ -77,8 +79,8 @@ class MyTopo( Topo ):
 def criaTeste():
 	"Cria a rede de testes"
 	topo = MyTopo()
-	rede = Mininet(topo)
-	#rede = Mininet(topo, link=TCLink)
+	#rede = Mininet(topo)
+	rede = Mininet(topo, link=TCLink)
 	#rede = Mininet( topo, link=TCLink, autoStaticArp=True )
 	rede.start()
 	
@@ -91,30 +93,77 @@ def criaTeste():
 
 	rede[ 'r0' ].cmd( 'ip route add to 10.0.1.0/24 via 10.0.3.2' )
 	rede[ 'r1' ].cmd( 'ip route add to 10.0.2.0/24 via 10.0.3.1' )
-	#rede[ 'Hd1' ].cmd( '' )
-	#rede[ 'Hd2' ].cmd( '' )
-	#rede[ 'Hd3' ].cmd( '' )
+	
+	
+	# porta reno
+	rede[ 'Hd1' ].cmd( 'iperf -s -p 5050 &' )
+	
+	# porta vegas 
+	rede[ 'Hd1' ].cmd( 'iperf -s -p 3030 &')
+	
+	rede[ 'He3' ].cmd( 'modprobe tcp-vegas' )
+	
+	# tranferencia 1 RENO / RENO
+	saida1_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq300 -Z reno -f K' )
+	saida1_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq1 -Z reno -f K' )
+	
+	time.sleep(1.25)
 
-	#rede[ 'He1' ].cmd( '' )
-	#rede[ 'He2' ].cmd( '' )
-	#rede[ 'He3' ].cmd( '' )
+	# transferencia 2 RENO / VEGAS
+	saida2_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq300 -Z reno -f K' )
+	saida2_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq1 -Z vegas -f K' )
+	
+	time.sleep(1.25)
 
-	
-	
-	#print "Testando as conexoes dos hosts com os switches"
-	#dumpNodeConnections(rede.hosts)
+	# transferencia 3 VEGAS / RENO
+	saida3_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq300 -Z vegas -f K' )
+	saida3_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq1 -Z reno -f K' )
 
-	#h1, h4 = rede.getNodeByName('Hd1', 'He1')	
-	#rede.iperf( ( h1, h4 ), l4Type='UDP' )
-	#rede.pingAll()
+	time.sleep(1.25)
+
+	# transferencia 4 VEGAS / VEGAS
+	saida4_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq300 -Z vegas -f K' )
+	saida4_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq1 -Z vegas -f K' ) 
 	
-	#info( 'Tabela de roteamento no roteador\n' )
-	#print rede[ 'r0' ].cmd( 'route' )
 	
-	rede.pingAll()
+	f = open("saida1_arq300.txt", "a")
+	f.write(saida1_arq300)
+	f.close()
+
+	f = open("saida1_arq1.txt", "a")
+	f.write(saida1_arq1)
+	f.close()
+
+
+
+	f = open("saida2_arq300.txt", "a")
+	f.write(saida2_arq300)
+	f.close()
 	
-	#info( 'Tabela de rotemento no roteador\n' )
-	#print rede[ 'r0' ].cmd( 'route' )
+	f =open("saida2_arq1.txt", "a")
+	f.write(saida2_arq1)
+	f.close()
+
+
+
+	f = open("saida3_arq300.txt", "a")
+	f.write(saida3_arq300)
+	f.close()
+	
+	f = open("saida3_arq1.txt", "a")
+	f.write(saida3_arq1)
+	f.close()
+
+
+
+	f = open("saida4_arq300.txt", "a")
+	f.write(saida4_arq300)
+	f.close()
+	
+	f = open("saida4_arq1.txt", "a")
+	f.write(saida4_arq1)
+	f.close()
+
 	CLI( rede )
 	
 	rede.stop()
