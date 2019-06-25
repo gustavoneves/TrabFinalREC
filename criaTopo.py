@@ -1,21 +1,12 @@
 from mininet.topo import Topo
 from mininet.net import Mininet
 from mininet.link import TCLink
-#from mininet.node import CPULimitedHost
-#from mininet.util import dumpNodeConnections
 from mininet.log import setLogLevel, info
 from mininet.node import Node
 
 from mininet.cli import CLI
 
 import time
-#from mininet.node import UserSwitch, OVSKernelSwitch, Controller
-#from mininet.log import lg
-#from mininet.util import irange, quietRun
-#from mininet.link import TCLink
-#from functools import partial
-
-
 
 class LinuxRouter( Node ):
 	"Habilitando o forwarding"
@@ -68,13 +59,9 @@ class MyTopo( Topo ):
 	self.addLink ( switchEsquerda, roteadorEsquerda, intfName2='r0-eth1', maxq=15 )
 	self.addLink ( switchDireita, roteadorDireita, intfName2='r1-eth1', maxq=20 )
 
-	#self.addLink ( roteadorEsquerda, roteadorDireita, intfName1='r0-eth0', intfName2='r1-eth0' ) 
         
 	# link entre os roteadores
 	self.addLink ( roteadorEsquerda, roteadorDireita, intfName1='r0-eth0', intfName2='r1-eth0', bw=0.2, delay='50ms' )
-	# Adicao do link entre os switches
-        #self.addLink( switchEsquerda, switchDireita )
-       	#self.addLink( switchEsquerda, switchDireita, bw=0.2, delay='50ms' )
 	
 def criaTeste():
 	"Cria a rede de testes"
@@ -171,7 +158,3 @@ def criaTeste():
 if __name__ == '__main__':
 	setLogLevel('info')
 	criaTeste()
-#topos = { 'mytopo': ( lambda: MyTopo() ) }
-
-# iperf
-# http://mininet.org/api/classmininet_1_1net_1_1Mininet.html
