@@ -1,0 +1,7 @@
+------------------------------------------------------------
+Client connecting to 10.0.1.2, TCP port 5050
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[  4] local 10.0.2.4 port 36646 connected with 10.0.1.2 port 5050
+[ ID] Interval       Transfer     Bandwidth
+[  4]  0.0- 2.7 sec   384 KBytes   145 KBytes/sec

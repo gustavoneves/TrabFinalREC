@@ -1,0 +1,7 @@
+------------------------------------------------------------
+Client connecting to 10.0.1.2, TCP port 3030
+TCP window size: 85.3 KByte (default)
+------------------------------------------------------------
+[  4] local 10.0.2.4 port 45474 connected with 10.0.1.2 port 3030
+[ ID] Interval       Transfer     Bandwidth
+[  4]  0.0-18.1 sec   512 KBytes  28.3 KBytes/sec
