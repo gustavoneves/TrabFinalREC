@@ -151,6 +151,68 @@ def criaTeste():
 	f.write(saida4_arq1)
 	f.close()
 
+# invertendo a ordem de envio
+# tranferencia 1 RENO / RENO
+	saida1_invertida_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq1 -Z reno -f K' )
+	saida1_invertida_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq300 -Z reno -f K' )
+	
+	time.sleep(1.25)
+
+	# transferencia 2 RENO / VEGAS
+	saida2_invertida_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq1 -Z reno -f K' )
+	saida2_invertida_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq300 -Z vegas -f K' )
+	
+	time.sleep(1.25)
+
+	# transferencia 3 VEGAS / RENO
+	saida3_invertida_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq1 -Z vegas -f K' )
+	saida3_invertida_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq300 -Z reno -f K' )
+
+	time.sleep(1.25)
+
+	# transferencia 4 VEGAS / VEGAS
+	saida4_invertida_arq1 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 5050 -F arq1 -Z vegas -f K' )
+	saida4_invertida_arq300 = rede[ 'He3' ].cmd( 'iperf -c 10.0.1.2 -p 3030 -F arq300 -Z vegas -f K' ) 
+	
+	
+	f = open("saida1_invertida_arq300.txt", "a")
+	f.write(saida1_invertida_arq300)
+	f.close()
+
+	f = open("saida1_invertida_arq1.txt", "a")
+	f.write(saida1_invertida_arq1)
+	f.close()
+
+
+
+	f = open("saida2_invertida_arq300.txt", "a")
+	f.write(saida2_invertida_arq300)
+	f.close()
+	
+	f =open("saida2_invertida_arq1.txt", "a")
+	f.write(saida2_invertida_arq1)
+	f.close()
+
+
+
+	f = open("saida3_invertida_arq300.txt", "a")
+	f.write(saida3_invertida_arq300)
+	f.close()
+	
+	f = open("saida3_invertida_arq1.txt", "a")
+	f.write(saida3_invertida_arq1)
+	f.close()
+
+
+
+	f = open("saida4_invertida_arq300.txt", "a")
+	f.write(saida4_invertida_arq300)
+	f.close()
+	
+	f = open("saida4_invertida_arq1.txt", "a")
+	f.write(saida4_invertida_arq1)
+	f.close()
+
 	CLI( rede )
 	
 	rede.stop()
